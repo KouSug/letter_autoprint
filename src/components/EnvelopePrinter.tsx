@@ -36,6 +36,7 @@ export const EnvelopePrinter: React.FC = () => {
     const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
     const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
     const [activeField, setActiveField] = useState<'zipCode' | 'address' | 'name' | null>(null);
+    const [confirmDialog, setConfirmDialog] = useState<{ message: string; onConfirm: () => void } | null>(null);
 
     // Initial settings for reset
     const INITIAL_FONT_SETTINGS = useMemo(() => ({
@@ -82,13 +83,18 @@ export const EnvelopePrinter: React.FC = () => {
     };
 
     const handleReset = () => {
-        if (!confirm('位置やフォントの設定を初期状態に戻しますか？')) return;
-        // Save current state to history before reset
-        setHistory(prev => [...prev, { fontSettings, printOffset }]);
-        isUndoingRef.current = true;
-        setFontSettings(INITIAL_FONT_SETTINGS);
-        setPrintOffset({ x: 0, y: 0 });
-        lastSavedRef.current = { fontSettings: INITIAL_FONT_SETTINGS, printOffset: { x: 0, y: 0 } };
+        setConfirmDialog({
+            message: '位置やフォントの設定を初期状態に戻しますか？',
+            onConfirm: () => {
+                // Save current state to history before reset
+                setHistory(prev => [...prev, { fontSettings, printOffset }]);
+                isUndoingRef.current = true;
+                setFontSettings(INITIAL_FONT_SETTINGS);
+                setPrintOffset({ x: 0, y: 0 });
+                lastSavedRef.current = { fontSettings: INITIAL_FONT_SETTINGS, printOffset: { x: 0, y: 0 } };
+                setConfirmDialog(null);
+            }
+        });
     };
 
     const fontOptions = [
@@ -214,11 +220,15 @@ export const EnvelopePrinter: React.FC = () => {
                             <div className="flex gap-4">
                                 <button
                                     onClick={() => {
-                                        if (confirm('データをクリアして最初の画面に戻りますか？')) {
-                                            setData([]);
-                                            setStep('upload');
-                                            setCurrentIndex(0);
-                                        }
+                                        setConfirmDialog({
+                                            message: 'データをクリアして最初の画面に戻りますか？',
+                                            onConfirm: () => {
+                                                setData([]);
+                                                setStep('upload');
+                                                setCurrentIndex(0);
+                                                setConfirmDialog(null);
+                                            }
+                                        });
                                     }}
                                     className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white"
                                 >
@@ -774,6 +784,45 @@ export const EnvelopePrinter: React.FC = () => {
                     );
                 })}
             </div>
+            {/* 確認用カスタムダイアログ */}
+            <AnimatePresence>
+                {confirmDialog && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4 backdrop-blur-sm"
+                        onClick={() => setConfirmDialog(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-8"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <h3 className="text-xl font-bold mb-4 text-white">確認</h3>
+                            <p className="text-slate-400 mb-8 leading-relaxed">
+                                {confirmDialog.message}
+                            </p>
+                            <div className="flex gap-3 justify-end">
+                                <button
+                                    onClick={() => setConfirmDialog(null)}
+                                    className="px-5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-colors"
+                                >
+                                    キャンセル
+                                </button>
+                                <button
+                                    onClick={confirmDialog.onConfirm}
+                                    className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-500/20 transition-all"
+                                >
+                                    実行
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </>
     );
 };
