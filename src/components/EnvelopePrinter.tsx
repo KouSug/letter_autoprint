@@ -202,7 +202,7 @@ export const EnvelopePrinter: React.FC = () => {
                 <div className="max-w-6xl mx-auto">
                     <header className="mb-12 flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <img src="/favicon.png" alt="App Icon" className="w-12 h-12" />
+                            <img src="favicon.png" alt="App Icon" className="w-12 h-12" />
                             <div>
                                 <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-2">
                                     封筒宛名印刷
