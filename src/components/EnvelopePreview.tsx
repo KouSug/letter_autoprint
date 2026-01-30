@@ -9,7 +9,7 @@ interface PreviewData {
 }
 
 interface FontSettings {
-    zipCode: { family: string; size: number; x: number; y: number };
+    zipCode: { family: string; size: number; x: number; y: number; spacing: number };
     address: { family: string; size: number; x: number; y: number };
     name: { family: string; size: number; x: number; y: number };
     honorific: { size: number };
@@ -23,7 +23,7 @@ interface EnvelopePreviewProps {
     onPositionChange: (key: 'zipCode' | 'address' | 'name', deltaX: number, deltaY: number) => void;
     activeField: 'zipCode' | 'address' | 'name' | null;
     onSelectField: (field: 'zipCode' | 'address' | 'name' | null) => void;
-    onFontChange: (key: 'zipCode' | 'address' | 'name' | 'honorific', setting: string | number, type: 'family' | 'size') => void;
+    onFontChange: (key: 'zipCode' | 'address' | 'name' | 'honorific', setting: string | number, type: 'family' | 'size' | 'spacing') => void;
     fontOptions: { label: string; value: string }[];
 }
 
@@ -107,22 +107,6 @@ export const EnvelopePreview: React.FC<EnvelopePreviewProps> = ({
                     fontFamily: '"Noto Serif JP", serif'
                 }}
             >
-                {/* 郵便番号枠（ガイド） */}
-                <div className="absolute top-[12mm] left-[44mm] flex gap-[1.8mm] pointer-events-none select-none opacity-50">
-                    {/* 左3桁 */}
-                    {[...Array(3)].map((_, i) => (
-                        <div key={`box-l-${i}`} className="w-[5.7mm] h-[8mm] border border-red-500" />
-                    ))}
-                    {/* ハイフン部分のスペース (約1mm幅のハイフンが入るが、枠としては空白扱い) */}
-                    <div className="w-[1mm] h-[8mm] flex items-center justify-center">
-                        <div className="w-[0.8mm] h-[0.2mm] bg-red-500" />
-                    </div>
-                    {/* 右4桁 */}
-                    {[...Array(4)].map((_, i) => (
-                        <div key={`box-r-${i}`} className="w-[5.6mm] h-[8mm] border border-red-500" />
-                    ))}
-                </div>
-
                 {/* 郵便番号 - JIS規格: 左端から約47mm、上端から約12mm */}
                 {/* 文字間隔は約7mmピッチに合わせて調整 */}
                 <div
@@ -130,12 +114,14 @@ export const EnvelopePreview: React.FC<EnvelopePreviewProps> = ({
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
                     onClick={(e) => e.stopPropagation()}
-                    className={`absolute top-[12mm] left-[46mm] flex gap-[5.5mm] font-bold ${getOutlineClass('zipCode')}`}
+                    className={`absolute top-[12mm] left-[46mm] flex justify-end font-bold ${getOutlineClass('zipCode')}`}
                     style={{
                         fontFamily: fontSettings.zipCode.family,
                         fontSize: `${fontSettings.zipCode.size}px`,
                         transform: `translate(${fontSettings.zipCode.x}mm, ${fontSettings.zipCode.y}mm)`,
-                        cursor: getCursorStyle('zipCode')
+                        cursor: getCursorStyle('zipCode'),
+                        gap: `${fontSettings.zipCode.spacing}mm`,
+                        width: '65mm' // 郵便番号枠の目安範囲
                     }}
                 >
                     {data.zipCode.replace(/[^0-9]/g, '').split('').map((char, i) => (
@@ -247,6 +233,20 @@ export const EnvelopePreview: React.FC<EnvelopePreviewProps> = ({
                         />
                         <span className="text-[10px] w-6 text-right">{fontSettings[activeField].size}px</span>
                     </div>
+
+                    {activeField === 'zipCode' && (
+                        <div className="flex items-center gap-2 pt-2 border-t border-slate-700/50">
+                            <span className="text-[10px] text-slate-500 w-6">間隔</span>
+                            <input
+                                type="range"
+                                min="0" max="15" step="0.1"
+                                value={fontSettings.zipCode.spacing}
+                                onChange={(e) => onFontChange('zipCode', e.target.value, 'spacing')} // Pass 'spacing' type
+                                className="flex-1 accent-indigo-500 h-1"
+                            />
+                            <span className="text-[10px] w-6 text-right">{fontSettings.zipCode.spacing}mm</span>
+                        </div>
+                    )}
 
                     {activeField === 'name' && (
                         <div className="flex items-center gap-2 pt-2 border-t border-slate-700/50">

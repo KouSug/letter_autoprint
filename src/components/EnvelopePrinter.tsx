@@ -26,7 +26,7 @@ export const EnvelopePrinter: React.FC = () => {
     const [step, setStep] = useState<'upload' | 'map' | 'preview'>('upload');
     const [printOffset, setPrintOffset] = useState({ x: 0, y: 0 });
     const [fontSettings, setFontSettings] = useState({
-        zipCode: { family: '"Noto Sans JP", sans-serif', size: 24, x: 0, y: 0 },
+        zipCode: { family: '"Noto Sans JP", sans-serif', size: 24, x: 0, y: 0, spacing: 5.5 },
         address: { family: '"Noto Serif JP", serif', size: 24, x: 0, y: 0 },
         name: { family: '"Shippori Mincho", serif', size: 48, x: 6, y: 45 },
         honorific: { size: 48 }
@@ -39,7 +39,7 @@ export const EnvelopePrinter: React.FC = () => {
 
     // Initial settings for reset
     const INITIAL_FONT_SETTINGS = useMemo(() => ({
-        zipCode: { family: '"Noto Sans JP", sans-serif', size: 24, x: 0, y: 0 },
+        zipCode: { family: '"Noto Sans JP", sans-serif', size: 24, x: 0, y: 0, spacing: 5.5 },
         address: { family: '"Noto Serif JP", serif', size: 24, x: 0, y: 0 },
         name: { family: '"Shippori Mincho", serif', size: 48, x: 6, y: 45 },
         honorific: { size: 48 }
@@ -127,8 +127,8 @@ export const EnvelopePrinter: React.FC = () => {
         const item = data[currentIndex];
         return {
             zipCode: item[mapping.zipCode] || '',
-            address1: item[mapping.address1] || '',
-            address2: item[mapping.address2] || '',
+            address1: (item[mapping.address1] || '').toString().replace(/[-－]/g, 'ー'),
+            address2: (item[mapping.address2] || '').toString().replace(/[-－]/g, 'ー'),
             name: item[mapping.name] || '',
             honorific: mapping.honorific,
         };
@@ -173,7 +173,7 @@ export const EnvelopePrinter: React.FC = () => {
         }));
     };
 
-    const handleFontChange = (key: 'zipCode' | 'address' | 'name' | 'honorific', setting: string | number, type: 'family' | 'size') => {
+    const handleFontChange = (key: 'zipCode' | 'address' | 'name' | 'honorific', setting: string | number, type: 'family' | 'size' | 'spacing') => {
         setFontSettings(prev => {
             // honorific only has size
             if (key === 'honorific') {
@@ -186,7 +186,7 @@ export const EnvelopePrinter: React.FC = () => {
                 ...prev,
                 [key]: {
                     ...prev[key],
-                    [type]: type === 'size' ? Number(setting) : setting
+                    [type]: type === 'family' ? setting : Number(setting)
                 }
             };
         });
@@ -311,7 +311,21 @@ export const EnvelopePrinter: React.FC = () => {
                                             >
                                                 <ChevronLeft size={20} />
                                             </button>
-                                            <span className="font-mono text-lg w-12 text-center">{currentIndex + 1} / {data.length}</span>
+                                            <div className="flex items-center gap-1 bg-white rounded px-2 border border-slate-300 shadow-inner">
+                                                <input
+                                                    type="number"
+                                                    value={currentIndex + 1}
+                                                    onChange={(e) => {
+                                                        const val = parseInt(e.target.value);
+                                                        if (!isNaN(val)) {
+                                                            const newIndex = Math.max(0, Math.min(data.length - 1, val - 1));
+                                                            setCurrentIndex(newIndex);
+                                                        }
+                                                    }}
+                                                    className="w-12 bg-transparent border-none text-center font-mono text-lg font-bold text-slate-900 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                />
+                                                <span className="text-slate-400 font-mono text-sm">/ {data.length}</span>
+                                            </div>
                                             <button
                                                 disabled={currentIndex === data.length - 1}
                                                 onClick={() => setCurrentIndex(i => i + 1)}
@@ -454,6 +468,18 @@ export const EnvelopePrinter: React.FC = () => {
                                                         onChange={(e) => setFontSettings(prev => ({ ...prev, zipCode: { ...prev.zipCode, size: Number(e.target.value) } }))}
                                                         className="w-full accent-indigo-500"
                                                     />
+                                                    {/* 文字間隔 */}
+                                                    <div className="pt-1">
+                                                        <div className="flex justify-between mb-1">
+                                                            <label className="text-[10px] text-slate-500">文字間隔 (mm)</label>
+                                                            <span className="text-[10px] text-slate-500">{fontSettings.zipCode.spacing}mm</span>
+                                                        </div>
+                                                        <input
+                                                            type="range" min="0" max="15" step="0.1" value={fontSettings.zipCode.spacing}
+                                                            onChange={(e) => setFontSettings(prev => ({ ...prev, zipCode: { ...prev.zipCode, spacing: Number(e.target.value) } }))}
+                                                            className="w-full accent-indigo-500 h-1"
+                                                        />
+                                                    </div>
                                                     {/* 位置調整 */}
                                                     <div className="flex gap-4 pt-1">
                                                         <div className="flex-1">
@@ -665,8 +691,8 @@ export const EnvelopePrinter: React.FC = () => {
 
                     const person = {
                         zipCode: item[mapping.zipCode] || '',
-                        address1: item[mapping.address1] || '',
-                        address2: item[mapping.address2] || '',
+                        address1: (item[mapping.address1] || '').toString().replace(/[-－]/g, 'ー'),
+                        address2: (item[mapping.address2] || '').toString().replace(/[-－]/g, 'ー'),
                         name: item[mapping.name] || '',
                         honorific: mapping.honorific,
                     };
@@ -674,11 +700,13 @@ export const EnvelopePrinter: React.FC = () => {
                         <div key={index} className="envelope-page text-slate-900" style={{ fontFamily: '"Noto Serif JP", serif' }}>
                             <div className="relative w-full h-full" style={{ transform: `translate(${printOffset.x}mm, ${printOffset.y}mm)` }}>
                                 {/* 郵便番号 */}
-                                <div className="absolute top-[12mm] left-[46mm] flex gap-[5.5mm] font-bold"
+                                <div className="absolute top-[12mm] left-[46mm] flex justify-end font-bold"
                                     style={{
                                         fontFamily: fontSettings.zipCode.family,
                                         fontSize: `${fontSettings.zipCode.size}px`,
-                                        transform: `translate(${fontSettings.zipCode.x}mm, ${fontSettings.zipCode.y}mm)`
+                                        transform: `translate(${fontSettings.zipCode.x}mm, ${fontSettings.zipCode.y}mm)`,
+                                        gap: `${fontSettings.zipCode.spacing}mm`,
+                                        width: '65mm'
                                     }}
                                 >
                                     {person.zipCode.replace(/[^0-9]/g, '').split('').map((char: string, i: number) => (
