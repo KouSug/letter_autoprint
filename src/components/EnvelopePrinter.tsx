@@ -122,13 +122,17 @@ export const EnvelopePrinter: React.FC = () => {
 
     const columns = useMemo(() => (data.length > 0 ? Object.keys(data[0]) : []), [data]);
 
+    const formatAddress = (value: any) => {
+        return (value || '').toString().replace(/[-－]/g, 'ー');
+    };
+
     const currentPersonData = useMemo(() => {
         if (data.length === 0) return null;
         const item = data[currentIndex];
         return {
             zipCode: item[mapping.zipCode] || '',
-            address1: (item[mapping.address1] || '').toString().replace(/[-－]/g, 'ー'),
-            address2: (item[mapping.address2] || '').toString().replace(/[-－]/g, 'ー'),
+            address1: formatAddress(item[mapping.address1]),
+            address2: formatAddress(item[mapping.address2]),
             name: item[mapping.name] || '',
             honorific: mapping.honorific,
         };
@@ -691,8 +695,8 @@ export const EnvelopePrinter: React.FC = () => {
 
                     const person = {
                         zipCode: item[mapping.zipCode] || '',
-                        address1: (item[mapping.address1] || '').toString().replace(/[-－]/g, 'ー'),
-                        address2: (item[mapping.address2] || '').toString().replace(/[-－]/g, 'ー'),
+                        address1: formatAddress(item[mapping.address1]),
+                        address2: formatAddress(item[mapping.address2]),
                         name: item[mapping.name] || '',
                         honorific: mapping.honorific,
                     };
