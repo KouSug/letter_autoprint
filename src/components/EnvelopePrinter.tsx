@@ -201,11 +201,14 @@ export const EnvelopePrinter: React.FC = () => {
             <div className="min-h-screen bg-[#0f172a] text-slate-200 p-4 md:p-8 no-print">
                 <div className="max-w-6xl mx-auto">
                     <header className="mb-12 flex items-center justify-between">
-                        <div>
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-2">
-                                封筒宛名印刷
-                            </h1>
-                            <p className="text-slate-400">Excelデータから高品質な封筒印刷を簡単に</p>
+                        <div className="flex items-center gap-4">
+                            <img src="/favicon.png" alt="App Icon" className="w-12 h-12" />
+                            <div>
+                                <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-2">
+                                    封筒宛名印刷
+                                </h1>
+                                <p className="text-slate-400">Excelデータから高品質な封筒印刷を簡単に</p>
+                            </div>
                         </div>
                         {data.length > 0 ? (
                             <div className="flex gap-4">
