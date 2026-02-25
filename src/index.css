@@ -61,10 +61,7 @@ body {
   }
 }
 
-@page {
-  margin: 0;
-  /* size is set dynamically via JS */
-}
+
 
 .print-only {
   display: none;

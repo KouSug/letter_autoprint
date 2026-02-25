@@ -180,16 +180,8 @@ export const EnvelopePrinter: React.FC = () => {
         window.print();
     };
 
-    // Dynamic Style for @page
-    React.useEffect(() => {
-        const style = document.createElement('style');
-        const size = ENVELOPE_SIZES[envelopeSize];
-        style.innerHTML = `@page { size: ${size.width}mm ${size.height}mm; margin: 0; }`;
-        document.head.appendChild(style);
-        return () => {
-            document.head.removeChild(style);
-        };
-    }, [envelopeSize]);
+    // Dynamic Style for @page affects the print dialog size
+    // Now handled directly in the render with an inline <style> block
 
     const handlePositionChange = (key: 'zipCode' | 'address' | 'name', deltaX: number, deltaY: number) => {
         setFontSettings(prev => ({
@@ -223,6 +215,9 @@ export const EnvelopePrinter: React.FC = () => {
 
     return (
         <>
+            <style type="text/css" media="print">
+                {`@page { size: ${ENVELOPE_SIZES[envelopeSize].width}mm ${ENVELOPE_SIZES[envelopeSize].height}mm; }`}
+            </style>
             <div className="min-h-screen bg-[#0f172a] text-slate-200 p-4 md:p-8 no-print">
                 <div className="max-w-6xl mx-auto">
                     <header className="mb-12 flex items-center justify-between">
@@ -341,9 +336,13 @@ export const EnvelopePrinter: React.FC = () => {
                                         <h2 className="text-xl font-bold">印刷プレビュー</h2>
                                         <div className="flex items-center gap-2">
                                             <button
-                                                disabled={currentIndex === 0}
-                                                onClick={() => setCurrentIndex(i => i - 1)}
+                                                disabled={currentIndex === 0 || Array.from(selectedIndices).filter(i => i < currentIndex).length === 0}
+                                                onClick={() => {
+                                                    const prevs = Array.from(selectedIndices).filter(i => i < currentIndex).sort((a, b) => b - a);
+                                                    setCurrentIndex(prevs.length ? prevs[0] : Math.max(0, currentIndex - 1));
+                                                }}
                                                 className="p-2 bg-slate-700 hover:bg-slate-600 rounded disabled:opacity-30 transition-colors"
+                                                title="前の印刷対象"
                                             >
                                                 <ChevronLeft size={20} />
                                             </button>
@@ -363,9 +362,13 @@ export const EnvelopePrinter: React.FC = () => {
                                                 <span className="text-slate-400 font-mono text-sm">/ {data.length}</span>
                                             </div>
                                             <button
-                                                disabled={currentIndex === data.length - 1}
-                                                onClick={() => setCurrentIndex(i => i + 1)}
+                                                disabled={currentIndex === data.length - 1 || Array.from(selectedIndices).filter(i => i > currentIndex).length === 0}
+                                                onClick={() => {
+                                                    const nexts = Array.from(selectedIndices).filter(i => i > currentIndex).sort((a, b) => a - b);
+                                                    setCurrentIndex(nexts.length ? nexts[0] : Math.min(data.length - 1, currentIndex + 1));
+                                                }}
                                                 className="p-2 bg-slate-700 hover:bg-slate-600 rounded disabled:opacity-30 transition-colors"
+                                                title="次の印刷対象"
                                             >
                                                 <ChevronRight size={20} />
                                             </button>
