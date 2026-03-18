@@ -35,7 +35,8 @@ export const EnvelopePrinter: React.FC = () => {
     const [printOffset, setPrintOffset] = useState({ x: 0, y: 0 });
     const [fontSettings, setFontSettings] = useState({
         zipCode: { family: '"Noto Sans JP", sans-serif', size: 24, x: 0, y: 0, spacing: 2.6 },
-        address: { family: '"Noto Serif JP", serif', size: 24, x: 0, y: 0 },
+        address1: { family: '"Noto Serif JP", serif', size: 24, x: 0, y: 0 },
+        address2: { family: '"Noto Serif JP", serif', size: 20, x: 0, y: 0 },
         name: { family: '"Shippori Mincho", serif', size: 48, x: 6, y: 45 },
         honorific: { size: 48 }
     });
@@ -43,13 +44,14 @@ export const EnvelopePrinter: React.FC = () => {
     const [localFonts, setLocalFonts] = useState<{ label: string; value: string }[]>([]);
     const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
     const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
-    const [activeField, setActiveField] = useState<'zipCode' | 'address' | 'name' | null>(null);
+    const [activeField, setActiveField] = useState<'zipCode' | 'address1' | 'address2' | 'name' | null>(null);
     const [confirmDialog, setConfirmDialog] = useState<{ message: string; onConfirm: () => void } | null>(null);
 
     // Initial settings for reset
     const INITIAL_FONT_SETTINGS = useMemo(() => ({
         zipCode: { family: '"Noto Sans JP", sans-serif', size: 24, x: 0, y: 0, spacing: 2.6 },
-        address: { family: '"Noto Serif JP", serif', size: 24, x: 0, y: 0 },
+        address1: { family: '"Noto Serif JP", serif', size: 24, x: 0, y: 0 },
+        address2: { family: '"Noto Serif JP", serif', size: 20, x: 0, y: 0 },
         name: { family: '"Shippori Mincho", serif', size: 48, x: 6, y: 45 },
         honorific: { size: 48 }
     }), []);
@@ -183,7 +185,7 @@ export const EnvelopePrinter: React.FC = () => {
     // Dynamic Style for @page affects the print dialog size
     // Now handled directly in the render with an inline <style> block
 
-    const handlePositionChange = (key: 'zipCode' | 'address' | 'name', deltaX: number, deltaY: number) => {
+    const handlePositionChange = (key: 'zipCode' | 'address1' | 'address2' | 'name', deltaX: number, deltaY: number) => {
         setFontSettings(prev => ({
             ...prev,
             [key]: {
@@ -194,7 +196,7 @@ export const EnvelopePrinter: React.FC = () => {
         }));
     };
 
-    const handleFontChange = (key: 'zipCode' | 'address' | 'name' | 'honorific', setting: string | number, type: 'family' | 'size' | 'spacing') => {
+    const handleFontChange = (key: 'zipCode' | 'address1' | 'address2' | 'name' | 'honorific', setting: string | number, type: 'family' | 'size' | 'spacing') => {
         setFontSettings(prev => {
             // honorific only has size
             if (key === 'honorific') {
@@ -460,23 +462,23 @@ export const EnvelopePrinter: React.FC = () => {
                                                 </div>
                                             </div>
 
-                                            {/* 住所 */}
+                                            {/* 住所1 */}
                                             <div>
                                                 <div className="flex justify-between mb-2">
-                                                    <label className="text-sm text-slate-400">住所</label>
-                                                    <span className="text-xs text-slate-500">{fontSettings.address.size}px</span>
+                                                    <label className="text-sm text-slate-400">住所1</label>
+                                                    <span className="text-xs text-slate-500">{fontSettings.address1.size}px</span>
                                                 </div>
                                                 <div className="space-y-2">
                                                     <select
-                                                        value={fontSettings.address.family}
-                                                        onChange={(e) => setFontSettings(prev => ({ ...prev, address: { ...prev.address, family: e.target.value } }))}
+                                                        value={fontSettings.address1.family}
+                                                        onChange={(e) => setFontSettings(prev => ({ ...prev, address1: { ...prev.address1, family: e.target.value } }))}
                                                         className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-sm"
                                                     >
                                                         {fontOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                                                     </select>
                                                     <input
-                                                        type="range" min="16" max="40" value={fontSettings.address.size}
-                                                        onChange={(e) => setFontSettings(prev => ({ ...prev, address: { ...prev.address, size: Number(e.target.value) } }))}
+                                                        type="range" min="16" max="40" value={fontSettings.address1.size}
+                                                        onChange={(e) => setFontSettings(prev => ({ ...prev, address1: { ...prev.address1, size: Number(e.target.value) } }))}
                                                         className="w-full accent-indigo-500"
                                                     />
                                                     {/* 位置調整 */}
@@ -484,16 +486,57 @@ export const EnvelopePrinter: React.FC = () => {
                                                         <div className="flex-1">
                                                             <label className="text-[10px] text-slate-500 block mb-1">横位置</label>
                                                             <input
-                                                                type="number" value={fontSettings.address.x}
-                                                                onChange={(e) => setFontSettings(prev => ({ ...prev, address: { ...prev.address, x: Number(e.target.value) } }))}
+                                                                type="number" value={fontSettings.address1.x}
+                                                                onChange={(e) => setFontSettings(prev => ({ ...prev, address1: { ...prev.address1, x: Number(e.target.value) } }))}
                                                                 className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs"
                                                             />
                                                         </div>
                                                         <div className="flex-1">
                                                             <label className="text-[10px] text-slate-500 block mb-1">縦位置</label>
                                                             <input
-                                                                type="number" value={fontSettings.address.y}
-                                                                onChange={(e) => setFontSettings(prev => ({ ...prev, address: { ...prev.address, y: Number(e.target.value) } }))}
+                                                                type="number" value={fontSettings.address1.y}
+                                                                onChange={(e) => setFontSettings(prev => ({ ...prev, address1: { ...prev.address1, y: Number(e.target.value) } }))}
+                                                                className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* 住所2 */}
+                                            <div>
+                                                <div className="flex justify-between mb-2">
+                                                    <label className="text-sm text-slate-400">住所2</label>
+                                                    <span className="text-xs text-slate-500">{fontSettings.address2.size}px</span>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <select
+                                                        value={fontSettings.address2.family}
+                                                        onChange={(e) => setFontSettings(prev => ({ ...prev, address2: { ...prev.address2, family: e.target.value } }))}
+                                                        className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-sm"
+                                                    >
+                                                        {fontOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                                    </select>
+                                                    <input
+                                                        type="range" min="16" max="40" value={fontSettings.address2.size}
+                                                        onChange={(e) => setFontSettings(prev => ({ ...prev, address2: { ...prev.address2, size: Number(e.target.value) } }))}
+                                                        className="w-full accent-indigo-500"
+                                                    />
+                                                    {/* 位置調整 */}
+                                                    <div className="flex gap-4 pt-1">
+                                                        <div className="flex-1">
+                                                            <label className="text-[10px] text-slate-500 block mb-1">横位置</label>
+                                                            <input
+                                                                type="number" value={fontSettings.address2.x}
+                                                                onChange={(e) => setFontSettings(prev => ({ ...prev, address2: { ...prev.address2, x: Number(e.target.value) } }))}
+                                                                className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs"
+                                                            />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <label className="text-[10px] text-slate-500 block mb-1">縦位置</label>
+                                                            <input
+                                                                type="number" value={fontSettings.address2.y}
+                                                                onChange={(e) => setFontSettings(prev => ({ ...prev, address2: { ...prev.address2, y: Number(e.target.value) } }))}
                                                                 className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs"
                                                             />
                                                         </div>
@@ -781,9 +824,9 @@ export const EnvelopePrinter: React.FC = () => {
                                         textOrientation: 'upright',
                                         maxHeight: '16cm',
                                         lineHeight: '1.8',
-                                        fontFamily: fontSettings.address.family,
-                                        fontSize: `${fontSettings.address.size}px`,
-                                        transform: `translate(${fontSettings.address.x}mm, ${fontSettings.address.y}mm)`
+                                        fontFamily: fontSettings.address1.family,
+                                        fontSize: `${fontSettings.address1.size}px`,
+                                        transform: `translate(${fontSettings.address1.x}mm, ${fontSettings.address1.y}mm)`
                                     }}
                                 >
                                     {person.address1}
@@ -797,9 +840,9 @@ export const EnvelopePrinter: React.FC = () => {
                                         textOrientation: 'upright',
                                         maxHeight: '14cm',
                                         lineHeight: '1.8',
-                                        fontFamily: fontSettings.address.family,
-                                        fontSize: `${fontSettings.address.size}px`,
-                                        transform: `translate(${fontSettings.address.x}mm, ${fontSettings.address.y}mm)`
+                                        fontFamily: fontSettings.address2.family,
+                                        fontSize: `${fontSettings.address2.size}px`,
+                                        transform: `translate(${fontSettings.address2.x}mm, ${fontSettings.address2.y}mm)`
                                     }}
                                 >
                                     {person.address2}

@@ -10,7 +10,8 @@ interface PreviewData {
 
 interface FontSettings {
     zipCode: { family: string; size: number; x: number; y: number; spacing: number };
-    address: { family: string; size: number; x: number; y: number };
+    address1: { family: string; size: number; x: number; y: number };
+    address2: { family: string; size: number; x: number; y: number };
     name: { family: string; size: number; x: number; y: number };
     honorific: { size: number };
 }
@@ -20,10 +21,10 @@ import { X } from 'lucide-react';
 interface EnvelopePreviewProps {
     data: PreviewData;
     fontSettings: FontSettings;
-    onPositionChange: (key: 'zipCode' | 'address' | 'name', deltaX: number, deltaY: number) => void;
-    activeField: 'zipCode' | 'address' | 'name' | null;
-    onSelectField: (field: 'zipCode' | 'address' | 'name' | null) => void;
-    onFontChange: (key: 'zipCode' | 'address' | 'name' | 'honorific', setting: string | number, type: 'family' | 'size' | 'spacing') => void;
+    onPositionChange: (key: 'zipCode' | 'address1' | 'address2' | 'name', deltaX: number, deltaY: number) => void;
+    activeField: 'zipCode' | 'address1' | 'address2' | 'name' | null;
+    onSelectField: (field: 'zipCode' | 'address1' | 'address2' | 'name' | null) => void;
+    onFontChange: (key: 'zipCode' | 'address1' | 'address2' | 'name' | 'honorific', setting: string | number, type: 'family' | 'size' | 'spacing') => void;
     fontOptions: { label: string; value: string }[];
     width: number;
     height: number;
@@ -41,10 +42,10 @@ export const EnvelopePreview: React.FC<EnvelopePreviewProps> = ({
     height
 }) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
-    const [dragging, setDragging] = React.useState<'zipCode' | 'address' | 'name' | null>(null);
+    const [dragging, setDragging] = React.useState<'zipCode' | 'address1' | 'address2' | 'name' | null>(null);
     const dragStartRef = React.useRef<{ x: number; y: number } | null>(null);
 
-    const handlePointerDown = (e: React.PointerEvent, key: 'zipCode' | 'address' | 'name') => {
+    const handlePointerDown = (e: React.PointerEvent, key: 'zipCode' | 'address1' | 'address2' | 'name') => {
         e.preventDefault();
         e.stopPropagation();
         (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -82,11 +83,11 @@ export const EnvelopePreview: React.FC<EnvelopePreviewProps> = ({
         }
     };
 
-    const getCursorStyle = (key: 'zipCode' | 'address' | 'name') => {
+    const getCursorStyle = (key: 'zipCode' | 'address1' | 'address2' | 'name') => {
         return dragging === key ? 'cursor-grabbing' : 'cursor-move';
     };
 
-    const getOutlineClass = (key: 'zipCode' | 'address' | 'name') => {
+    const getOutlineClass = (key: 'zipCode' | 'address1' | 'address2' | 'name') => {
         const isActive = activeField === key;
         return isActive
             ? 'outline outline-2 outline-indigo-500 rounded p-1 bg-indigo-500/5 transition-all'
@@ -132,20 +133,20 @@ export const EnvelopePreview: React.FC<EnvelopePreviewProps> = ({
 
                 {/* 住所1 (縦書き) - 右端から約15-20mm、上端から約25-30mm */}
                 <div
-                    onPointerDown={(e) => handlePointerDown(e, 'address')}
+                    onPointerDown={(e) => handlePointerDown(e, 'address1')}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
                     onClick={(e) => e.stopPropagation()}
-                    className={`absolute top-[28mm] right-[16mm] text-2xl font-medium tracking-widest ${getOutlineClass('address')}`}
+                    className={`absolute top-[28mm] right-[16mm] text-2xl font-medium tracking-widest ${getOutlineClass('address1')}`}
                     style={{
                         writingMode: 'vertical-rl',
                         textOrientation: 'upright',
                         maxHeight: '16cm',
                         lineHeight: '1.8',
-                        fontFamily: fontSettings.address.family,
-                        fontSize: `${fontSettings.address.size}px`,
-                        transform: `translate(${fontSettings.address.x}mm, ${fontSettings.address.y}mm)`,
-                        cursor: getCursorStyle('address')
+                        fontFamily: fontSettings.address1.family,
+                        fontSize: `${fontSettings.address1.size}px`,
+                        transform: `translate(${fontSettings.address1.x}mm, ${fontSettings.address1.y}mm)`,
+                        cursor: getCursorStyle('address1')
                     }}
                 >
                     {data.address1}
@@ -153,20 +154,20 @@ export const EnvelopePreview: React.FC<EnvelopePreviewProps> = ({
 
                 {/* 住所2 (縦書き) - 住所1の左側、少し下げて配置 */}
                 <div
-                    onPointerDown={(e) => handlePointerDown(e, 'address')}
+                    onPointerDown={(e) => handlePointerDown(e, 'address2')}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
                     onClick={(e) => e.stopPropagation()}
-                    className={`absolute top-[45mm] right-[28mm] text-xl tracking-widest ${getOutlineClass('address')}`}
+                    className={`absolute top-[45mm] right-[28mm] text-xl tracking-widest ${getOutlineClass('address2')}`}
                     style={{
                         writingMode: 'vertical-rl',
                         textOrientation: 'upright',
                         maxHeight: '14cm',
                         lineHeight: '1.8',
-                        fontFamily: fontSettings.address.family,
-                        fontSize: `${fontSettings.address.size * 0.8}px`,
-                        transform: `translate(${fontSettings.address.x}mm, ${fontSettings.address.y}mm)`,
-                        cursor: getCursorStyle('address')
+                        fontFamily: fontSettings.address2.family,
+                        fontSize: `${fontSettings.address2.size}px`,
+                        transform: `translate(${fontSettings.address2.x}mm, ${fontSettings.address2.y}mm)`,
+                        cursor: getCursorStyle('address2')
                     }}
                 >
                     {data.address2}
@@ -208,7 +209,7 @@ export const EnvelopePreview: React.FC<EnvelopePreviewProps> = ({
                 >
                     <div className="flex justify-between items-center border-b border-slate-700 pb-2 mb-1">
                         <span className="text-xs font-bold text-slate-300">
-                            {activeField === 'zipCode' ? '郵便番号' : activeField === 'address' ? '住所' : '宛名'}のフォント
+                            {activeField === 'zipCode' ? '郵便番号' : activeField === 'address1' ? '住所1' : activeField === 'address2' ? '住所2' : '宛名'}のフォント
                         </span>
                         <button onClick={() => onSelectField(null)} className="text-slate-400 hover:text-white">
                             <X size={14} />
