@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import * as XLSX from 'xlsx';
-import { Upload } from 'lucide-react';
+import { Upload, Download } from 'lucide-react';
 
 interface ExcelUploaderProps {
   onDataLoaded: (data: any[]) => void;
@@ -23,23 +23,71 @@ export const ExcelUploader: React.FC<ExcelUploaderProps> = ({ onDataLoaded }) =>
     reader.readAsBinaryString(file);
   }, [onDataLoaded]);
 
+  const handleDownloadTemplate = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // テンプレートデータの作成
+    const templateData = [
+      {
+        '郵便番号': '100-0001',
+        '住所1': '東京都千代田区千代田1-1-1',
+        '住所2': '千代田ビルディング1階',
+        '氏名': '山田 太郎'
+      },
+      {
+        '郵便番号': '163-8001',
+        '住所1': '東京都新宿区西新宿2-8-1',
+        '住所2': '東京都庁',
+        '氏名': '東京 花子'
+      }
+    ];
+
+    // ワークブックとワークシートの作成
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '住所録テンプレート');
+
+    // 列幅の調整（見やすさのため）
+    const colWidths = [
+      { wch: 10 }, // 郵便番号
+      { wch: 30 }, // 住所1
+      { wch: 30 }, // 住所2
+      { wch: 15 }  // 氏名
+    ];
+    worksheet['!cols'] = colWidths;
+
+    // ファイルのダウンロード
+    XLSX.writeFile(workbook, '宛名印刷テンプレート.xlsx');
+  }, []);
+
   return (
-    <label className="glass p-12 text-center border-dashed border-2 border-slate-600 hover:border-indigo-500 transition-colors cursor-pointer relative group block">
-      <input
-        type="file"
-        accept=".xlsx, .xls"
-        onChange={handleFileUpload}
-        className="sr-only"
-      />
-      <div className="flex flex-col items-center gap-4">
-        <div className="p-4 rounded-full bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition-transform">
-          <Upload size={48} />
+    <div className="flex flex-col items-center gap-6">
+      <label className="glass p-12 text-center border-dashed border-2 border-slate-600 hover:border-indigo-500 transition-colors cursor-pointer relative group block w-full max-w-2xl">
+        <input
+          type="file"
+          accept=".xlsx, .xls"
+          onChange={handleFileUpload}
+          className="sr-only"
+        />
+        <div className="flex flex-col items-center gap-4">
+          <div className="p-4 rounded-full bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition-transform">
+            <Upload size={48} />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Excelファイルをアップロード</h3>
+            <p className="text-slate-400">クリックまたはドラッグ＆ドロップでファイルを選択</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Excelファイルをアップロード</h3>
-          <p className="text-slate-400">クリックまたはドラッグ＆ドロップでファイルを選択</p>
-        </div>
-      </div>
-    </label>
+      </label>
+
+      <button
+        onClick={handleDownloadTemplate}
+        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700 hover:border-slate-500 shadow-lg"
+      >
+        <Download size={18} className="text-emerald-400" />
+        入力用テンプレートをダウンロード
+      </button>
+    </div>
   );
 };
