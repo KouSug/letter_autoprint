@@ -27,24 +27,13 @@ export const ExcelUploader: React.FC<ExcelUploaderProps> = ({ onDataLoaded }) =>
     e.preventDefault();
     e.stopPropagation();
 
-    // テンプレートデータの作成
+    // テンプレートデータの作成（見出しのみ）
     const templateData = [
-      {
-        '郵便番号': '100-0001',
-        '住所1': '東京都千代田区千代田1-1-1',
-        '住所2': '千代田ビルディング1階',
-        '氏名': '山田 太郎'
-      },
-      {
-        '郵便番号': '163-8001',
-        '住所1': '東京都新宿区西新宿2-8-1',
-        '住所2': '東京都庁',
-        '氏名': '東京 花子'
-      }
+      ['郵便番号', '住所1', '住所2', '氏名']
     ];
 
     // ワークブックとワークシートの作成
-    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const worksheet = XLSX.utils.aoa_to_sheet(templateData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, '住所録テンプレート');
 
