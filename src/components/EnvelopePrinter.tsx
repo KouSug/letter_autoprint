@@ -34,7 +34,7 @@ export const EnvelopePrinter: React.FC = () => {
     const [step, setStep] = useState<'upload' | 'map' | 'preview'>('upload');
     const [printOffset, setPrintOffset] = useState({ x: 0, y: 0 });
     const [fontSettings, setFontSettings] = useState({
-        zipCode: { family: '"Noto Sans JP", sans-serif', size: 24, x: 0, y: 0, spacing: 2.5 },
+        zipCode: { family: '"Noto Sans JP", sans-serif', size: 24, x: 0, y: 0, spacing: 2.6 },
         address: { family: '"Noto Serif JP", serif', size: 24, x: 0, y: 0 },
         name: { family: '"Shippori Mincho", serif', size: 48, x: 6, y: 45 },
         honorific: { size: 48 }
@@ -48,7 +48,7 @@ export const EnvelopePrinter: React.FC = () => {
 
     // Initial settings for reset
     const INITIAL_FONT_SETTINGS = useMemo(() => ({
-        zipCode: { family: '"Noto Sans JP", sans-serif', size: 24, x: 0, y: 0, spacing: 2.5 },
+        zipCode: { family: '"Noto Sans JP", sans-serif', size: 24, x: 0, y: 0, spacing: 2.6 },
         address: { family: '"Noto Serif JP", serif', size: 24, x: 0, y: 0 },
         name: { family: '"Shippori Mincho", serif', size: 48, x: 6, y: 45 },
         honorific: { size: 48 }
